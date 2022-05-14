@@ -706,6 +706,7 @@ int main(int argc, char *argv[])
     argv++;
   }
 
+
   target = *argv;
   argv++;
  // while(1) {
@@ -721,10 +722,22 @@ int main(int argc, char *argv[])
 
   
   if (attach)
-  {
+  {  
+    //printf("%d", *((int*)threads.t+1));
+    exit(-1);
     pid = atoi(*argv);
-    init_tids(pid);
-    for (int i = 0, n = 0; i < THREAD_NUMBER && n < threads.len; i++)
+  }
+    //init_tids(pid);
+  int i=1,n=0;
+    //while(int i = 0, n = 0; i < THREAD_NUMBER && n < threads.len; i++)
+	 
+
+    struct thread_id_t id_t;
+    threads.t[0] = id_t;
+    while(*((int*)threads.t+i)!=0) {
+	    printf("nigger ");
+	    i++;
+   
       if (threads.t[i].tid)
       {
         if (ptrace(PTRACE_ATTACH, threads.t[i].tid, NULL, NULL) < 0)
@@ -738,38 +751,39 @@ int main(int argc, char *argv[])
           return -1;
         }
         ptrace(PTRACE_SETOPTIONS, threads.t[i].tid, NULL, PTRACE_O_TRACECLONE);
+	i++;
         n++;
       }
   }
-  else
-  {
-    pid = fork();
-    if (pid == 0)
-    {
-      char **args = argv;
-      setpgrp();
-      ptrace(PTRACE_TRACEME, 0, NULL, NULL);
-      execvp(args[0], args);
-      perror(args[0]);
-      _exit(1);
-    }
-    if (waitpid(pid, &stat, __WALL) < 0)
-    {
-      perror("waitpid");
-      return -1;
-    }
-    threads.t[0].pid = threads.t[0].tid = pid;
-    threads.t[0].stat = stat;
-    threads.len = 1;
-    int options = PTRACE_O_TRACECLONE;
-#ifdef PTRACE_O_EXITKILL
-    options |= PTRACE_O_EXITKILL;
-#endif
-    ptrace(PTRACE_SETOPTIONS, pid, NULL, options);
-  }
-  threads.curr = &threads.t[0];
-  initialize_async_io(sigint_pid);
-  remote_prepare(target);
-  get_request();
+//  else
+//  {
+//    pid = fork();
+//    if (pid == 0)
+//    {
+//      char **args = argv;
+//      setpgrp();
+//      ptrace(PTRACE_TRACEME, 0, NULL, NULL);
+//      execvp(args[0], args);
+//      perror(args[0]);
+//      _exit(1);
+//    }
+//    if (waitpid(pid, &stat, __WALL) < 0)
+//    {
+//      perror("waitpid");
+//      return -1;
+//    }
+//    threads.t[0].pid = threads.t[0].tid = pid;
+//    threads.t[0].stat = stat;
+//    threads.len = 1;
+//    int options = PTRACE_O_TRACECLONE;
+//#ifdef PTRACE_O_EXITKILL
+//    options |= PTRACE_O_EXITKILL;
+//#endif
+//    ptrace(PTRACE_SETOPTIONS, pid, NULL, options);
+//  }
+//  threads.curr = &threads.t[0];
+//  initialize_async_io(sigint_pid);
+//  remote_prepare(target);
+//  get_request();
   return 0;
 }
