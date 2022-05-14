@@ -694,6 +694,9 @@ void get_request()
   }
 }
 
+void fill(struct thread_id_t **id, int size) {
+	
+}
 int main(int argc, char *argv[])
 {
   pid_t pid;
@@ -705,7 +708,6 @@ int main(int argc, char *argv[])
     attach = true;
     argv++;
   }
-
 
   target = *argv;
   argv++;
@@ -723,7 +725,7 @@ int main(int argc, char *argv[])
   
   if (attach)
   {  
-    //printf("%d", *((int*)threads.t+1));
+    printf(" %d", *((int*)threads.curr+1));
     exit(-1);
     pid = atoi(*argv);
   }
@@ -732,12 +734,12 @@ int main(int argc, char *argv[])
     //while(int i = 0, n = 0; i < THREAD_NUMBER && n < threads.len; i++)
 	 
 
-    struct thread_id_t id_t;
+  struct thread_id_t  id_t ;
     threads.t[0] = id_t;
+    //printf("%d", *((int*)threads.t+1));
     while(*((int*)threads.t+i)!=0) {
-	    printf("nigger ");
-	    i++;
    
+	printf("%d", threads.t[i].tid);
       if (threads.t[i].tid)
       {
         if (ptrace(PTRACE_ATTACH, threads.t[i].tid, NULL, NULL) < 0)
@@ -751,9 +753,9 @@ int main(int argc, char *argv[])
           return -1;
         }
         ptrace(PTRACE_SETOPTIONS, threads.t[i].tid, NULL, PTRACE_O_TRACECLONE);
-	i++;
-        n++;
       }
+        i++;
+        n++;
   }
 //  else
 //  {
