@@ -103,7 +103,7 @@ bool check_clone()
 {
   if (is_clone_event(threads.curr->stat))
   {
-    size_t newtid;
+    unsigned int  newtid;
     int stat;
     ptrace(PTRACE_GETEVENTMSG, threads.curr->tid, NULL, (long)&newtid);
     if (waitpid(newtid, &stat, __WALL) > 0)
@@ -697,28 +697,32 @@ void get_request()
 int main(int argc, char *argv[])
 {
   pid_t pid;
-  char **next_arg = &argv[1];
   char *arg_end, *target = NULL;
   int stat;
-
-  if (*next_arg != NULL && strcmp(*next_arg, "--attach") == 0)
+  argv+=1;
+  if (*argv != NULL && strcmp(*argv, "--attach") == 0)
   {
     attach = true;
-    next_arg++;
+    argv++;
   }
 
-  target = *next_arg;
-  next_arg++;
+  target = *argv;
+  argv++;
+ // while(1) {
+ //         *next_arg = *next_arg + 1;
+ //       if(*(int*)(*next_arg)!=0) break;
+ // }
 
-  if (target == NULL || *next_arg == NULL)
+  if (target == NULL || *argv == NULL)
   {
     printf("Usage : gdbserver 127.0.0.1:1234 a.out or gdbserver --attach 127.0.0.1:1234 2468\n");
     exit(-1);
   }
 
+  
   if (attach)
   {
-    pid = atoi(*next_arg);
+    pid = atoi(*argv);
     init_tids(pid);
     for (int i = 0, n = 0; i < THREAD_NUMBER && n < threads.len; i++)
       if (threads.t[i].tid)
@@ -742,7 +746,7 @@ int main(int argc, char *argv[])
     pid = fork();
     if (pid == 0)
     {
-      char **args = next_arg;
+      char **args = argv;
       setpgrp();
       ptrace(PTRACE_TRACEME, 0, NULL, NULL);
       execvp(args[0], args);
