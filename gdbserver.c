@@ -693,15 +693,41 @@ void get_request()
     write_flush();
   }
 }
+#if !defined(SIZE)
+#error 'SIZE' must be defined
+#endif
 
-void fill(struct thread_id_t **id, int size) {
+void fill(struct thread_list_t **id, int size) {
+	*id = malloc(sizeof(struct thread_list_t)*size);
+	struct thread_list_t t;
+	for(int i=0;i<size;i++) (*id)[i]  = t;
+	//printf("%d", *(int*)*id);
 	
 }
+void assign(struct thread_list_t **t) {
+
+  int i=1,n=0;
+	while(*((int*)(*t+i))!=0) {
+	int frk = fork();
+       (*t)[i].t[i].pid = (frk>0 && frk!=0) ? frk: 0;
+       	i++;
+        n++;
+  }
+}
+////#define size 3
+
+void print_stat(int *stats) {
+	for(int i=0;i<SIZE;i++) 
+		printf("%d ", stats[i]);
+	printf("\n");
+}
+
 int main(int argc, char *argv[])
 {
   pid_t pid;
   char *arg_end, *target = NULL;
   int stat;
+  int stats[SIZE*SIZE];
   argv+=1;
   if (*argv != NULL && strcmp(*argv, "--attach") == 0)
   {
@@ -730,33 +756,22 @@ int main(int argc, char *argv[])
     pid = atoi(*argv);
   }
     //init_tids(pid);
-  int i=1,n=0;
     //while(int i = 0, n = 0; i < THREAD_NUMBER && n < threads.len; i++)
-	 
-
-  struct thread_id_t  id_t ;
-    threads.t[0] = id_t;
-    //printf("%d", *((int*)threads.t+1));
-    while(*((int*)threads.t+i)!=0) {
-   
-	printf("%d", threads.t[i].tid);
-      if (threads.t[i].tid)
-      {
-        if (ptrace(PTRACE_ATTACH, threads.t[i].tid, NULL, NULL) < 0)
-        {
-          perror("ptrace()");
-          return -1;
-        }
-        if (waitpid(threads.t[i].tid, &threads.t[i].stat, __WALL) < 0)
-        {
-          perror("waitpid");
-          return -1;
-        }
-        ptrace(PTRACE_SETOPTIONS, threads.t[i].tid, NULL, PTRACE_O_TRACECLONE);
-      }
-        i++;
-        n++;
-  }
+  struct thread_list_t *t =  malloc(1000);// &threads;
+  fill(&t,SIZE);
+  assign(&t);
+int err, pid_;
+char *pid_char = malloc(sizeof(char));
+for(int i=1;(t+i)->t[i].pid!=0;i++) {
+	if((t+i)->t[i].pid!=0)	err = ptrace((t+i)->t[i].pid, 0, NULL, NULL);
+	else err = ptrace((t+i)->t[i].pid, 0, NULL, NULL);
+	pid_ = waitpid(pid,&stat, __WALL);
+	if(pid_>0) stats[i-1] =  pid_;
+	sprintf(pid_char, "%d", (t+i)->t[i].pid);
+	//if(err<0) perror(pid_char);
+}
+print_stat(stats);
+  free(pid_char);
 //  else
 //  {
 //    pid = fork();
